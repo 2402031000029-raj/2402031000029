@@ -1,1 +1,1059 @@
+1. App.tsx (Main Entry)
+import { RouterProvider } from 'react-router';
+import { router } from './routes';
+import { CartProvider } from './context/CartContext';
+import { Toaster } from './components/ui/sonner';
 
+export default function App() {
+  return (
+    <CartProvider>
+      <RouterProvider router={router} />
+      <Toaster />
+    </CartProvider>
+  );
+}
+2. routes.tsx (Router Configuration)
+import { createBrowserRouter } from 'react-router';
+import { Layout } from './components/Layout';
+import { Home } from './pages/Home';
+import { ProductDetail } from './pages/ProductDetail';
+import { Cart } from './pages/Cart';
+import { Checkout } from './pages/Checkout';
+import { OrderConfirmation } from './pages/OrderConfirmation';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    Component: Layout,
+    children: [
+      { index: true, Component: Home },
+      { path: 'product/:id', Component: ProductDetail },
+      { path: 'cart', Component: Cart },
+      { path: 'checkout', Component: Checkout },
+      { path: 'order-confirmation', Component: OrderConfirmation },
+    ],
+  },
+]);
+3. types.ts (TypeScript Interfaces)
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  price: number;
+  description: string;
+  image: string;
+  category: string;
+  size: string;
+  notes: string[];
+  inStock: boolean;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface ShippingInfo {
+  fullName: string;
+  email: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface PaymentInfo {
+  cardNumber: string;
+  cardName: string;
+  expiryDate: string;
+  cvv: string;
+}
+4. data/products.ts (Product Data)
+import { Product } from "../types";
+
+export const products: Product[] = [
+  {
+    id: "1",
+    name: "Noir Élégance",
+    brand: "Maison Luxe",
+    price: 145.00,
+    description: "A sophisticated blend of dark spices and rich woods, perfect for evening wear. This timeless fragrance exudes confidence and mystery.",
+    image: "https://images.unsplash.com/photo-1719175936556-dbd05e415913?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZXJmdW1lJTIwYm90dGxlfGVufDF8fHx8MTc3MzAzNjcxMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Woody",
+    size: "100ml",
+    notes: ["Bergamot", "Black Pepper", "Sandalwood", "Amber"],
+    inStock: true,
+  },
+  {
+    id: "2",
+    name: "Rose Impériale",
+    brand: "Parfum Royal",
+    price: 189.00,
+    description: "An opulent bouquet of rare roses from Grasse, complemented by delicate jasmine and warm musk. A truly regal fragrance.",
+    image: "https://images.unsplash.com/photo-1618137585731-4c33c287d2dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyb3NlJTIwZnJhZ3JhbmNlJTIwYm90dGxlfGVufDF8fHx8MTc3MzEyNjU2N3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Floral",
+    size: "50ml",
+    notes: ["Bulgarian Rose", "Jasmine", "Vanilla", "White Musk"],
+    inStock: true,
+  },
+  {
+    id: "3",
+    name: "Aqua Vitae",
+    brand: "Oceanique",
+    price: 125.00,
+    description: "Fresh and invigorating, this marine-inspired scent captures the essence of ocean breezes and coastal adventures.",
+    image: "https://images.unsplash.com/photo-1763631403216-8d193008481e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVtaXVtJTIwY29sb2duZSUyMGJvdHRsZXxlbnwxfHx8fDE3NzMxMjY1NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Fresh",
+    size: "100ml",
+    notes: ["Sea Salt", "Bergamot", "Driftwood", "Ambergris"],
+    inStock: true,
+  },
+  {
+    id: "4",
+    name: "Velvet Oud",
+    brand: "Oriental House",
+    price: 245.00,
+    description: "An exotic masterpiece featuring rare oud wood from Southeast Asia, layered with saffron and leather notes.",
+    image: "https://images.unsplash.com/photo-1747052881000-a640a4981dd0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVnYW50JTIwZnJhZ3JhbmNlJTIwYm90dGxlfGVufDF8fHx8MTc3MzA0NDU1NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Oriental",
+    size: "75ml",
+    notes: ["Saffron", "Oud Wood", "Leather", "Patchouli"],
+    inStock: true,
+  },
+  {
+    id: "5",
+    name: "Citrus Moderne",
+    brand: "Urban Scent",
+    price: 95.00,
+    description: "A contemporary citrus blend perfect for daily wear. Fresh, clean, and energizing with a modern twist.",
+    image: "https://images.unsplash.com/photo-1767458770505-4daf3e3a3f77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXNpZ25lciUyMHBlcmZ1bWUlMjBkaXNwbGF5fGVufDF8fHx8MTc3MzEyNjU2N3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Citrus",
+    size: "100ml",
+    notes: ["Grapefruit", "Lime", "Vetiver", "Cedar"],
+    inStock: true,
+  },
+  {
+    id: "6",
+    name: "Midnight Garden",
+    brand: "Maison Luxe",
+    price: 165.00,
+    description: "A captivating night-blooming floral composition with hints of exotic fruits and precious woods.",
+    image: "https://images.unsplash.com/photo-1761865544944-2c8da85c869e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBwZXJmdW1lJTIwcGFja2FnaW5nfGVufDF8fHx8MTc3MzEyNjU2N3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
+    category: "Floral",
+    size: "50ml",
+    notes: ["Night Jasmine", "Blackcurrant", "Tonka Bean", "Sandalwood"],
+    inStock: true,
+  },
+];
+5. context/CartContext.tsx (State Management)
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { CartItem, Product } from '../types';
+
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: Product) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  getCartTotal: () => number;
+  getCartCount: () => number;
+}
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  const addToCart = (product: Product) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.product.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prevCart, { product, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
+  };
+
+  const updateQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  };
+
+  const getCartCount = () => {
+    return cart.reduce((count, item) => count + item.quantity, 0);
+  };
+
+  return (
+    <CartContext.Provider
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        getCartTotal,
+        getCartCount,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function useCart() {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+}
+6. components/Layout.tsx
+import { Outlet } from 'react-router';
+import { Header } from './Header';
+
+export function Layout() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <footer className="bg-gray-900 text-white py-8 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="font-serif text-lg mb-4">Essence Boutique</h3>
+              <p className="text-sm text-gray-400">
+                Your destination for luxury fragrances from around the world.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">Shop</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li>New Arrivals</li>
+                <li>Best Sellers</li>
+                <li>For Him</li>
+                <li>For Her</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li>Contact Us</li>
+                <li>Shipping Info</li>
+                <li>Returns</li>
+                <li>FAQ</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-4">Newsletter</h4>
+              <p className="text-sm text-gray-400 mb-4">
+                Subscribe for exclusive offers and fragrance tips.
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+            <p>&copy; 2026 Essence Boutique. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+7. components/Header.tsx
+import { Link } from 'react-router';
+import { ShoppingCart, Sparkles } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { Button } from './ui/button';
+
+export function Header() {
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
+
+  return (
+    <header className="border-b sticky top-0 bg-white z-50">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <Sparkles className="w-8 h-8" />
+            <div>
+              <h1 className="text-2xl font-serif">Essence Boutique</h1>
+              <p className="text-xs text-gray-500">Luxury Fragrances</p>
+            </div>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/" className="hover:text-gray-600 transition">
+              Shop
+            </Link>
+            <Link to="/about" className="hover:text-gray-600 transition">
+              About
+            </Link>
+            <Link to="/contact" className="hover:text-gray-600 transition">
+              Contact
+            </Link>
+          </nav>
+
+          <Link to="/cart">
+            <Button variant="outline" className="relative">
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+8. components/ProductCard.tsx
+import { Link } from 'react-router';
+import { Product } from '../types';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { useCart } from '../context/CartContext';
+import { ShoppingBag } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart(product);
+    toast.success(`${product.name} added to cart`);
+  };
+
+  return (
+    <Link to={`/product/${product.id}`}>
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+        <div className="aspect-square overflow-hidden bg-gray-100">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+        <CardContent className="p-4">
+          <p className="text-sm text-gray-500">{product.brand}</p>
+          <h3 className="font-serif mt-1 mb-2">{product.name}</h3>
+          <p className="text-sm text-gray-600 mb-3">{product.size}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xl">${product.price.toFixed(2)}</p>
+            <Button
+              size="sm"
+              onClick={handleAddToCart}
+              className="gap-2"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+9. pages/Home.tsx
+import { products } from '../data/products';
+import { ProductCard } from '../components/ProductCard';
+
+export function Home() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-amber-50 to-pink-50 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl md:text-6xl font-serif mb-4">
+            Discover Your Signature Scent
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Explore our curated collection of luxury fragrances from the world's finest perfume houses
+          </p>
+        </div>
+      </section>
+
+      {/* Products Grid */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl font-serif">Our Collection</h2>
+          <p className="text-gray-600">{products.length} fragrances</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-white py-16 mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Authentic Products</h3>
+              <p className="text-gray-600">100% genuine fragrances from authorized distributors</p>
+            </div>
+            <div>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Secure Payment</h3>
+              <p className="text-gray-600">Encrypted transactions for your peace of mind</p>
+            </div>
+            <div>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Fast Shipping</h3>
+              <p className="text-gray-600">Free shipping on orders over $100</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+10. pages/ProductDetail.tsx
+import { useParams, useNavigate } from 'react-router';
+import { products } from '../data/products';
+import { Button } from '../components/ui/button';
+import { useCart } from '../context/CartContext';
+import { ShoppingBag, ArrowLeft, Check } from 'lucide-react';
+import { toast } from 'sonner';
+
+export function ProductDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  const product = products.find((p) => p.id === id);
+
+  if (!product) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl mb-4">Product not found</h2>
+        <Button onClick={() => navigate('/')}>Back to Shop</Button>
+      </div>
+    );
+  }
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    toast.success(`${product.name} added to cart`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6 gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+
+        <div className="grid md:grid-cols-2 gap-12 bg-white rounded-lg p-8">
+          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <p className="text-gray-500 mb-2">{product.brand}</p>
+            <h1 className="text-4xl font-serif mb-4">{product.name}</h1>
+            <p className="text-3xl mb-6">${product.price.toFixed(2)}</p>
+
+            <div className="mb-6">
+              <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm">
+                <Check className="w-4 h-4" />
+                In Stock
+              </span>
+            </div>
+
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              {product.description}
+            </p>
+
+            <div className="mb-6">
+              <h3 className="font-serif text-lg mb-3">Fragrance Notes</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.notes.map((note) => (
+                  <span
+                    key={note}
+                    className="bg-amber-50 text-amber-900 px-3 py-1 rounded-full text-sm"
+                  >
+                    {note}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="font-serif text-lg mb-2">Details</h3>
+              <div className="space-y-1 text-gray-600">
+                <p>Size: {product.size}</p>
+                <p>Category: {product.category}</p>
+              </div>
+            </div>
+
+            <div className="mt-auto">
+              <Button
+                size="lg"
+                className="w-full gap-2"
+                onClick={handleAddToCart}
+              >
+                <ShoppingBag className="w-5 h-5" />
+                Add to Cart
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+11. pages/Cart.tsx
+import { useNavigate } from 'react-router';
+import { useCart } from '../context/CartContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+
+export function Cart() {
+  const navigate = useNavigate();
+  const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart();
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <ShoppingBag className="w-24 h-24 mx-auto text-gray-300 mb-4" />
+          <h2 className="text-2xl font-serif mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 mb-6">Discover our exclusive collection of fragrances</p>
+          <Button onClick={() => navigate('/')}>Continue Shopping</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const subtotal = getCartTotal();
+  const shipping = subtotal > 100 ? 0 : 10;
+  const total = subtotal + shipping;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif mb-8">Shopping Cart</h1>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {cart.map((item) => (
+              <Card key={item.product.id}>
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <img
+                      src={item.product.image}
+                      alt={item.product.name}
+                      className="w-24 h-24 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-serif text-lg">{item.product.name}</h3>
+                      <p className="text-sm text-gray-500">{item.product.brand}</p>
+                      <p className="text-sm text-gray-600 mt-1">{item.product.size}</p>
+                      <p className="mt-2">${item.product.price.toFixed(2)}</p>
+                    </div>
+                    <div className="flex flex-col items-end justify-between">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFromCart(item.product.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div>
+            <Card className="sticky top-24">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-serif mb-6">Order Summary</h2>
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Shipping</span>
+                    <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                  </div>
+                  {subtotal > 100 && (
+                    <p className="text-sm text-green-600">🎉 Free shipping applied!</p>
+                  )}
+                  <div className="border-t pt-3 flex justify-between text-lg">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
+                </div>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => navigate('/checkout')}
+                >
+                  Proceed to Checkout
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full mt-3"
+                  onClick={() => navigate('/')}
+                >
+                  Continue Shopping
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+12. pages/Checkout.tsx (With Payment Gateway)
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useCart } from '../context/CartContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { ShippingInfo, PaymentInfo } from '../types';
+import { CreditCard, Lock, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+export function Checkout() {
+  const navigate = useNavigate();
+  const { cart, getCartTotal, clearCart } = useCart();
+  const [loading, setLoading] = useState(false);
+
+  const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
+    fullName: '',
+    email: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: '',
+  });
+
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
+    cardNumber: '',
+    cardName: '',
+    expiryDate: '',
+    cvv: '',
+  });
+
+  if (cart.length === 0) {
+    navigate('/cart');
+    return null;
+  }
+
+  const subtotal = getCartTotal();
+  const shipping = subtotal > 100 ? 0 : 10;
+  const total = subtotal + shipping;
+
+  const handleShippingChange = (field: keyof ShippingInfo, value: string) => {
+    setShippingInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePaymentChange = (field: keyof PaymentInfo, value: string) => {
+    setPaymentInfo((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate shipping info
+    if (!shippingInfo.fullName || !shippingInfo.email || !shippingInfo.address || 
+        !shippingInfo.city || !shippingInfo.postalCode || !shippingInfo.country) {
+      toast.error('Please fill in all shipping details');
+      return;
+    }
+
+    // Validate payment info
+    if (!paymentInfo.cardNumber || !paymentInfo.cardName || 
+        !paymentInfo.expiryDate || !paymentInfo.cvv) {
+      toast.error('Please fill in all payment details');
+      return;
+    }
+
+    setLoading(true);
+
+    // Simulate payment processing
+    // In a real application, you would integrate with a payment gateway like Stripe
+    // Example: 
+    // const response = await fetch('/api/process-payment', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     amount: total * 100, // Convert to cents
+    //     shippingInfo,
+    //     paymentInfo: {
+    //       cardNumber: paymentInfo.cardNumber,
+    //       expiryDate: paymentInfo.expiryDate,
+    //       cvv: paymentInfo.cvv
+    //     }
+    //   })
+    // });
+
+    setTimeout(() => {
+      setLoading(false);
+      clearCart();
+      navigate('/order-confirmation', { 
+        state: { 
+          orderNumber: `ORD-${Date.now()}`,
+          total,
+          shippingInfo 
+        } 
+      });
+      toast.success('Payment processed successfully!');
+    }, 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif mb-8">Checkout</h1>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Shipping Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Shipping Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      value={shippingInfo.fullName}
+                      onChange={(e) => handleShippingChange('fullName', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={shippingInfo.email}
+                      onChange={(e) => handleShippingChange('email', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      value={shippingInfo.address}
+                      onChange={(e) => handleShippingChange('address', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={shippingInfo.city}
+                        onChange={(e) => handleShippingChange('city', e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Input
+                        id="postalCode"
+                        value={shippingInfo.postalCode}
+                        onChange={(e) => handleShippingChange('postalCode', e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="country">Country</Label>
+                    <Input
+                      id="country"
+                      value={shippingInfo.country}
+                      onChange={(e) => handleShippingChange('country', e.target.value)}
+                      required
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Payment Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm flex items-start gap-2">
+                    <Lock className="w-4 h-4 mt-0.5 text-amber-700" />
+                    <div className="text-amber-800">
+                      <p className="font-medium mb-1">Demo Payment Gateway</p>
+                      <p className="text-xs">This is a demonstration. In production, this would integrate with Stripe, PayPal, or similar payment processors with secure tokenization.</p>
+                      <p className="text-xs mt-1">Test card: Use any valid format (e.g., 4242 4242 4242 4242)</p>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="cardNumber">Card Number</Label>
+                    <Input
+                      id="cardNumber"
+                      placeholder="1234 5678 9012 3456"
+                      value={paymentInfo.cardNumber}
+                      onChange={(e) => handlePaymentChange('cardNumber', e.target.value)}
+                      maxLength={19}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cardName">Cardholder Name</Label>
+                    <Input
+                      id="cardName"
+                      value={paymentInfo.cardName}
+                      onChange={(e) => handlePaymentChange('cardName', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="expiryDate">Expiry Date</Label>
+                      <Input
+                        id="expiryDate"
+                        placeholder="MM/YY"
+                        value={paymentInfo.expiryDate}
+                        onChange={(e) => handlePaymentChange('expiryDate', e.target.value)}
+                        maxLength={5}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cvv">CVV</Label>
+                      <Input
+                        id="cvv"
+                        placeholder="123"
+                        value={paymentInfo.cvv}
+                        onChange={(e) => handlePaymentChange('cvv', e.target.value)}
+                        maxLength={4}
+                        required
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Order Summary */}
+            <div>
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle>Order Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    {cart.map((item) => (
+                      <div key={item.product.id} className="flex justify-between text-sm">
+                        <span className="text-gray-600">
+                          {item.product.name} x{item.quantity}
+                        </span>
+                        <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Shipping</span>
+                      <span>{shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}</span>
+                    </div>
+                    <div className="border-t pt-2 flex justify-between text-lg">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-4 h-4 mr-2" />
+                        Pay ${total.toFixed(2)}
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-gray-500 text-center">
+                    Your payment information is encrypted and secure
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+13. pages/OrderConfirmation.tsx
+import { useLocation, useNavigate } from 'react-router';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { CheckCircle, Home } from 'lucide-react';
+import { useEffect } from 'react';
+
+export function OrderConfirmation() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { orderNumber, total, shippingInfo } = location.state || {};
+
+  useEffect(() => {
+    if (!orderNumber) {
+      navigate('/');
+    }
+  }, [orderNumber, navigate]);
+
+  if (!orderNumber) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
+            <h1 className="text-3xl font-serif mb-4">Order Confirmed!</h1>
+            <p className="text-gray-600 mb-8">
+              Thank you for your purchase. Your order has been successfully placed.
+            </p>
+
+            <div className="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+              <h2 className="font-serif text-xl mb-4">Order Details</h2>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Order Number:</span>
+                  <span className="font-medium">{orderNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Amount:</span>
+                  <span className="font-medium">${total?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Email:</span>
+                  <span className="font-medium">{shippingInfo?.email}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-left">
+              <h3 className="font-medium text-blue-900 mb-2">What's Next?</h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• You will receive an order confirmation email shortly</li>
+                <li>• Your order will be processed within 1-2 business days</li>
+                <li>• Shipping typically takes 3-5 business days</li>
+                <li>• Track your order using the link in your email</li>
+              </ul>
+            </div>
+
+            <Button
+              size="lg"
+              className="w-full gap-2"
+              onClick={() => navigate('/')}
+            >
+              <Home className="w-5 h-5" />
+              Continue Shopping
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
